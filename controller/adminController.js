@@ -1,4 +1,4 @@
-const AdminImageModel = require("../modal/vendorImageModel");
+const AdminImageModel = require("../model/adminImagesModel");
 
 exports.adminmultiimage = async (req, res) => {
     const { adminEmail } = req.body

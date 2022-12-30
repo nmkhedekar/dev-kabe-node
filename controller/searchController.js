@@ -1,4 +1,7 @@
 const { openai } = require("../utils/openaiConf");
+const User = require("../model/userModel");
+const UserHistory = require("../model/userHistory");
+const { responseSuccess, responseError } = require("../helper/Status");
 
 const getSearchResultController = async (req, res) => {
     const generatePrompt = (animal) => {
@@ -23,12 +26,23 @@ const getSearchResultController = async (req, res) => {
 }
 
 const generateImageController = async (req, res) => {
-    const response = await openai.createImage({
-        prompt: req.body.text,
-        n: 10,
-        size: "1024x1024",
-    });
-    res.status(201).json({ result: response.data })
+    let userHistory;
+    const user = await User.find({ _id: req.body.id });   
+    if (user) {
+        const response = await openai.createImage({
+            prompt: req.body.text,
+            n: 4,
+            size: "1024x1024",
+        }); 
+        userHistory = await UserHistory.create({
+            searchString: req.body.text,
+            data: response.data.data,
+            user: user[0]._id
+        });
+        return res.status(201).json({ result: response.data, userHistory });
+    } else {
+        return res.status(404).json({ msg: "user does not exists" });
+    }
 }
 
 const autoCompletion = async (req, res) => {

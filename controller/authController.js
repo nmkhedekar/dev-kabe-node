@@ -1,4 +1,4 @@
-const User = require("../modal/userModal");
+const User = require("../model/userModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const {responseError,responseSuccess} = require("../helper/Status");
@@ -15,7 +15,7 @@ exports.login = (req,res) =>{
          	if(data){
          		const checkPassword = await data.authenticate(password); 
 
-         		if(checkPassword && (data.role==="Buyer" || data.role==="Admin" || data.role==="Vendor")){
+         		if(checkPassword && (data.role==="Admin" || data.role==="User")){
          			const token = jwt.sign({_id:data._id,role:data.role},process.env.port,{expiresIn:"1d"})
     			    res.cookie("token",token,{expiresIn:"1d"})
                     const {_id,fname,lname,email,username,role,fullname} = data;
@@ -41,7 +41,6 @@ exports.reg=(req,res)=>{
     		return responseError(res,201,14);
     	}
     	const hashPassword =  await bcrypt.hash(password,10);
-        const role = "Admin";
         const otp = Math.floor(100000+Math.random()*900000);
     	const userData =new User({
     		fname,lname,username,email,hashPassword,role,otp
